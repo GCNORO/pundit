@@ -27,7 +27,17 @@ export default function Home() {
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [showCopied, setShowCopied] = useState(false);
+  const [showHowTo, setShowHowTo] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-open the "How to play" modal for first-time visitors
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!localStorage.getItem("pundit-seen-howto")) {
+      setShowHowTo(true);
+      localStorage.setItem("pundit-seen-howto", "1");
+    }
+  }, []);
 
   const wrongGuesses = gameState.guesses.filter(
     (g) => g.toLowerCase() !== todayPlayer.name.toLowerCase()
@@ -136,6 +146,18 @@ export default function Home() {
   return (
     <div className="app">
       <header className="header">
+        <button
+          className="help-btn"
+          onClick={() => setShowHowTo(true)}
+          aria-label="How to play"
+          title="How to play"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </button>
         <h1>
           <span>Pun</span>dit
         </h1>
@@ -352,6 +374,51 @@ export default function Home() {
       </footer>
 
       {showCopied && <div className="copied-toast">Copied to clipboard!</div>}
+
+      {showHowTo && (
+        <div className="modal-overlay" onClick={() => setShowHowTo(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close"
+              onClick={() => setShowHowTo(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <h2>How to play</h2>
+            <p className="modal-lead">
+              Guess today&rsquo;s mystery footballer from their career path.
+            </p>
+            <ul className="modal-list">
+              <li>
+                <strong>5 guesses</strong> per day. The puzzle resets at midnight.
+              </li>
+              <li>
+                You start with <strong>2&ndash;3 clubs</strong> from the player&rsquo;s
+                career, in order. The current club is hidden as <code>???</code>.
+              </li>
+              <li>
+                Each wrong guess unlocks the next clue:
+                <ul className="modal-clues">
+                  <li>① Career path</li>
+                  <li>② Position</li>
+                  <li>③ Nationality</li>
+                  <li>④ Age</li>
+                  <li>⑤ Current club &amp; league</li>
+                </ul>
+              </li>
+              <li>
+                Type a name &mdash; the autocomplete only suggests players in the
+                pool, so spelling won&rsquo;t hurt you.
+              </li>
+              <li>Share your result emoji-grid when you&rsquo;re done. 🟢🟥</li>
+            </ul>
+            <button className="modal-cta" onClick={() => setShowHowTo(false)}>
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
