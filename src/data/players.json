@@ -1,0 +1,294 @@
+[
+  {
+    "id": "1",
+    "name": "Erling Haaland",
+    "nationality": "Norway",
+    "position": "Forward",
+    "age": 24,
+    "currentClub": "Manchester City",
+    "currentLeague": "Premier League",
+    "careerPath": [
+      { "club": "Bryne FK", "season": "2016-2017" },
+      { "club": "Molde FK", "season": "2017-2019" },
+      { "club": "RB Salzburg", "season": "2019-2020" },
+      { "club": "Borussia Dortmund", "season": "2020-2022" },
+      { "club": "Manchester City", "season": "2022-" }
+    ]
+  },
+  {
+    "id": "2",
+    "name": "Kylian Mbappe",
+    "nationality": "France",
+    "position": "Forward",
+    "age": 26,
+    "currentClub": "Real Madrid",
+    "currentLeague": "La Liga",
+    "careerPath": [
+      { "club": "AS Monaco", "season": "2015-2017" },
+      { "club": "Paris Saint-Germain", "season": "2017-2024" },
+      { "club": "Real Madrid", "season": "2024-" }
+    ]
+  },
+  {
+    "id": "3",
+    "name": "Jude Bellingham",
+    "nationality": "England",
+    "position": "Midfielder",
+    "age": 21,
+    "currentClub": "Real Madrid",
+    "currentLeague": "La Liga",
+    "careerPath": [
+      { "club": "Birmingham City", "season": "2019-2020" },
+      { "club": "Borussia Dortmund", "season": "2020-2023" },
+      { "club": "Real Madrid", "season": "2023-" }
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Bukayo Saka",
+    "nationality": "England",
+    "position": "Forward",
+    "age": 23,
+    "currentClub": "Arsenal",
+    "currentLeague": "Premier League",
+    "careerPath": [
+      { "club": "Arsenal Academy", "season": "2018-2019" },
+      { "club": "Arsenal", "season": "2019-" }
+    ]
+  },
+  {
+    "id": "5",
+    "name": "Vinicius Junior",
+    "nationality": "Brazil",
+    "position": "Forward",
+    "age": 24,
+    "currentClub": "Real Madrid",
+    "currentLeague": "La Liga",
+    "careerPath": [
+      { "club": "Flamengo", "season": "2017-2018" },
+      { "club": "Real Madrid", "season": "2018-" }
+    ]
+  },
+  {
+    "id": "6",
+    "name": "Florian Wirtz",
+    "nationality": "Germany",
+    "position": "Midfielder",
+    "age": 21,
+    "currentClub": "Bayer Leverkusen",
+    "currentLeague": "Bundesliga",
+    "careerPath": [
+      { "club": "1. FC Koln Youth", "season": "2019-2020" },
+      { "club": "Bayer Leverkusen", "season": "2020-" }
+    ]
+  },
+  {
+    "id": "7",
+    "name": "Lamine Yamal",
+    "nationality": "Spain",
+    "position": "Forward",
+    "age": 17,
+    "currentClub": "FC Barcelona",
+    "currentLeague": "La Liga",
+    "careerPath": [
+      { "club": "FC Barcelona Academy", "season": "2022-2023" },
+      { "club": "FC Barcelona", "season": "2023-" }
+    ]
+  },
+  {
+    "id": "8",
+    "name": "Rodri",
+    "nationality": "Spain",
+    "position": "Midfielder",
+    "age": 28,
+    "currentClub": "Manchester City",
+    "currentLeague": "Premier League",
+    "careerPath": [
+      { "club": "Villarreal", "season": "2015-2018" },
+      { "club": "Atletico Madrid", "season": "2018-2019" },
+      { "club": "Manchester City", "season": "2019-" }
+    ]
+  },
+  {
+    "id": "9",
+    "name": "Jamal Musiala",
+    "nationality": "Germany",
+    "position": "Midfielder",
+    "age": 21,
+    "currentClub": "Bayern Munich",
+    "currentLeague": "Bundesliga",
+    "careerPath": [
+      { "club": "Chelsea Academy", "season": "2017-2019" },
+      { "club": "Bayern Munich", "season": "2019-" }
+    ]
+  },
+  {
+    "id": "10",
+    "name": "Mohamed Salah",
+    "nationality": "Egypt",
+    "position": "Forward",
+    "age": 32,
+    "currentClub": "Liverpool",
+    "currentLeague": "Premier League",
+    "careerPath": [
+      { "club": "El Mokawloon", "season": "2010-2012" },
+      { "club": "FC Basel", "season": "2012-2014" },
+      { "club": "Chelsea", "season": "2014-2016" },
+      { "club": "Fiorentina", "season": "2015" },
+      { "club": "AS Roma", "season": "2015-2017" },
+      { "club": "Liverpool", "season": "2017-" }
+    ]
+  },
+  {
+    "id": "11",
+    "name": "Kevin De Bruyne",
+    "nationality": "Belgium",
+    "position": "Midfielder",
+    "age": 33,
+    "currentClub": "Manchester City",
+    "currentLeague": "Premier League",
+    "careerPath": [
+      { "club": "KRC Genk", "season": "2008-2012" },
+      { "club": "Chelsea", "season": "2012-2014" },
+      { "club": "Werder Bremen", "season": "2012-2013" },
+      { "club": "VfL Wolfsburg", "season": "2014-2015" },
+      { "club": "Manchester City", "season": "2015-" }
+    ]
+  },
+  {
+    "id": "12",
+    "name": "Robert Lewandowski",
+    "nationality": "Poland",
+    "position": "Forward",
+    "age": 36,
+    "currentClub": "FC Barcelona",
+    "currentLeague": "La Liga",
+    "careerPath": [
+      { "club": "Znicz Pruszkow", "season": "2006-2008" },
+      { "club": "Lech Poznan", "season": "2008-2010" },
+      { "club": "Borussia Dortmund", "season": "2010-2014" },
+      { "club": "Bayern Munich", "season": "2014-2022" },
+      { "club": "FC Barcelona", "season": "2022-" }
+    ]
+  },
+  {
+    "id": "13",
+    "name": "Lautaro Martinez",
+    "nationality": "Argentina",
+    "position": "Forward",
+    "age": 27,
+    "currentClub": "Inter Milan",
+    "currentLeague": "Serie A",
+    "careerPath": [
+      { "club": "Racing Club", "season": "2015-2018" },
+      { "club": "Inter Milan", "season": "2018-" }
+    ]
+  },
+  {
+    "id": "14",
+    "name": "Victor Osimhen",
+    "nationality": "Nigeria",
+    "position": "Forward",
+    "age": 25,
+    "currentClub": "Galatasaray",
+    "currentLeague": "Serie A",
+    "careerPath": [
+      { "club": "VfL Wolfsburg", "season": "2017-2018" },
+      { "club": "Charleroi", "season": "2018-2019" },
+      { "club": "Lille", "season": "2019-2020" },
+      { "club": "Napoli", "season": "2020-2024" },
+      { "club": "Galatasaray", "season": "2024-" }
+    ]
+  },
+  {
+    "id": "15",
+    "name": "Bruno Fernandes",
+    "nationality": "Portugal",
+    "position": "Midfielder",
+    "age": 30,
+    "currentClub": "Manchester United",
+    "currentLeague": "Premier League",
+    "careerPath": [
+      { "club": "Novara", "season": "2012-2013" },
+      { "club": "Udinese", "season": "2013-2017" },
+      { "club": "Sampdoria", "season": "2016-2017" },
+      { "club": "Sporting CP", "season": "2017-2020" },
+      { "club": "Manchester United", "season": "2020-" }
+    ]
+  },
+  {
+    "id": "16",
+    "name": "Ousmane Dembele",
+    "nationality": "France",
+    "position": "Forward",
+    "age": 27,
+    "currentClub": "Paris Saint-Germain",
+    "currentLeague": "Ligue 1",
+    "careerPath": [
+      { "club": "Rennes", "season": "2015-2016" },
+      { "club": "Borussia Dortmund", "season": "2016-2017" },
+      { "club": "FC Barcelona", "season": "2017-2023" },
+      { "club": "Paris Saint-Germain", "season": "2023-" }
+    ]
+  },
+  {
+    "id": "17",
+    "name": "Declan Rice",
+    "nationality": "England",
+    "position": "Midfielder",
+    "age": 26,
+    "currentClub": "Arsenal",
+    "currentLeague": "Premier League",
+    "careerPath": [
+      { "club": "Chelsea Academy", "season": "2006-2014" },
+      { "club": "West Ham United", "season": "2014-2023" },
+      { "club": "Arsenal", "season": "2023-" }
+    ]
+  },
+  {
+    "id": "18",
+    "name": "Pedri",
+    "nationality": "Spain",
+    "position": "Midfielder",
+    "age": 22,
+    "currentClub": "FC Barcelona",
+    "currentLeague": "La Liga",
+    "careerPath": [
+      { "club": "Las Palmas", "season": "2019-2020" },
+      { "club": "FC Barcelona", "season": "2020-" }
+    ]
+  },
+  {
+    "id": "19",
+    "name": "Khvicha Kvaratskhelia",
+    "nationality": "Georgia",
+    "position": "Forward",
+    "age": 23,
+    "currentClub": "Paris Saint-Germain",
+    "currentLeague": "Ligue 1",
+    "careerPath": [
+      { "club": "Dinamo Tbilisi", "season": "2017-2019" },
+      { "club": "Lokomotiv Moscow", "season": "2019" },
+      { "club": "Rubin Kazan", "season": "2019-2021" },
+      { "club": "Dinamo Batumi", "season": "2021-2022" },
+      { "club": "Napoli", "season": "2022-2025" },
+      { "club": "Paris Saint-Germain", "season": "2025-" }
+    ]
+  },
+  {
+    "id": "20",
+    "name": "Virgil van Dijk",
+    "nationality": "Netherlands",
+    "position": "Defender",
+    "age": 33,
+    "currentClub": "Liverpool",
+    "currentLeague": "Premier League",
+    "careerPath": [
+      { "club": "Willem II", "season": "2010-2011" },
+      { "club": "Groningen", "season": "2011-2013" },
+      { "club": "Celtic", "season": "2013-2015" },
+      { "club": "Southampton", "season": "2015-2018" },
+      { "club": "Liverpool", "season": "2018-" }
+    ]
+  }
+]
