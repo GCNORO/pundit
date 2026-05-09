@@ -257,6 +257,60 @@ body {
   transform: scale(0.98);
 }
 
+/* Share menu */
+.share-menu {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.share-label {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.share-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.share-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.15s, filter 0.15s;
+}
+
+.share-icon-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.share-icon-btn:active {
+  transform: scale(0.95);
+}
+
+.share-native    { background: var(--accent); color: #000; }
+.share-whatsapp  { background: #25D366; }
+.share-x         { background: #000; }
+.share-telegram  { background: #229ED9; }
+.share-facebook  { background: #1877F2; }
+.share-reddit    { background: #FF4500; }
+.share-copy      { background: var(--bg-input); color: var(--text); border: 1px solid var(--border); }
+
 /* Guess counter */
 .guess-counter {
   text-align: center;

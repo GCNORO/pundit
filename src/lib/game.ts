@@ -36,8 +36,22 @@ export function getCurrentClueTier(wrongGuesses: number): ClueTier {
 export function getRevealedClues(player: Player, tier: ClueTier) {
   const clues: Record<string, string | number | string[]> = {};
 
-  // Tier 1: Career path (always shown)
-  clues.careerPath = player.careerPath.map((s) => s.club);
+  // Tier 1: Career path — hide the current club (last stop) until tier 5
+  const fullPath = player.careerPath.map((s) => s.club);
+  if (tier >= 5) {
+    clues.careerPath = fullPath;
+  } else {
+    // Replace the current/last club with a placeholder
+    const trimmed = [...fullPath];
+    if (
+      trimmed.length > 0 &&
+      trimmed[trimmed.length - 1].toLowerCase() ===
+        player.currentClub.toLowerCase()
+    ) {
+      trimmed[trimmed.length - 1] = "???";
+    }
+    clues.careerPath = trimmed;
+  }
 
   // Tier 2+: Position
   if (tier >= 2) clues.position = player.position;

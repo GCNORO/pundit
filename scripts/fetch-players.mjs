@@ -3,11 +3,12 @@
  *
  * Usage: node scripts/fetch-players.mjs
  *
- * This script:
- * 1. Searches for top players from the big 5 leagues
- * 2. Fetches each player's profile and transfer history
- * 3. Builds ordered career paths
- * 4. Outputs src/data/players.json
+ * Pipeline:
+ * 1. Get all clubs in the big-5 leagues
+ * 2. Get each club's roster (already includes age/position/nationality)
+ * 3. For each player, fetch transfer history → build career path
+ * 4. Sort by market value, take top N per league
+ * 5. Output src/data/players.json
  *
  * API: https://transfermarkt-api.fly.dev
  */
@@ -19,7 +20,6 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const API_BASE = "https://transfermarkt-api.fly.dev";
 
-// Top 5 league competition IDs on Transfermarkt
 const LEAGUES = [
   { id: "GB1", name: "Premier League" },
   { id: "ES1", name: "La Liga" },
@@ -28,99 +28,81 @@ const LEAGUES = [
   { id: "FR1", name: "Ligue 1" },
 ];
 
-// Rate limiting — be respectful
+const SEASON = "2024";
+const TOP_PER_LEAGUE = 60;       // ~300 total; tweak as needed
+const MIN_CAREER_STOPS = 3;      // need a meaningful path
+const REQUEST_DELAY_MS = 150;    // be polite
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function fetchJSON(path) {
+async function fetchJSON(path, retries = 2) {
   const url = `${API_BASE}${path}`;
-  console.log(`  GET ${url}`);
-  const res = await fetch(url);
-  if (!res.ok) {
-    console.error(`  ERROR ${res.status} for ${url}`);
-    return null;
-  }
-  return res.json();
-}
-
-async function getLeaguePlayers(leagueId, season = "2024") {
-  // Get clubs in the league
-  const data = await fetchJSON(
-    `/competitions/${leagueId}/clubs?season_id=${season}`
-  );
-  if (!data?.clubs) return [];
-  return data.clubs;
-}
-
-async function getClubPlayers(clubId, season = "2024") {
-  const data = await fetchJSON(`/clubs/${clubId}/players?season_id=${season}`);
-  if (!data?.players) return [];
-  return data.players;
-}
-
-async function getPlayerProfile(playerId) {
-  return fetchJSON(`/players/${playerId}/profile`);
-}
-
-async function getPlayerTransfers(playerId) {
-  return fetchJSON(`/players/${playerId}/transfers`);
-}
-
-function buildCareerPath(transfers) {
-  if (!transfers?.transferHistory) return [];
-
-  // Transfers are typically newest-first, so reverse for chronological order
-  const history = [...transfers.transferHistory].reverse();
-
-  const career = [];
-  const seen = new Set();
-
-  for (const t of history) {
-    // Add the "from" club if not seen
-    if (t.from?.name && !seen.has(t.from.name)) {
-      seen.add(t.from.name);
-      career.push({
-        club: t.from.name,
-        season: t.date || "",
-      });
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return res.json();
+      if (res.status === 404) return null;
+      console.error(`  ${res.status} ${url}`);
+    } catch (e) {
+      console.error(`  ERR ${url}: ${e.message}`);
     }
-    // Add the "to" club
-    if (t.to?.name && !seen.has(t.to.name)) {
-      seen.add(t.to.name);
-      career.push({
-        club: t.to.name,
-        season: t.date || "",
-      });
-    }
+    await sleep(500 * (attempt + 1));
   }
-
-  return career;
+  return null;
 }
 
 function mapPosition(pos) {
   if (!pos) return "Unknown";
   const p = pos.toLowerCase();
   if (p.includes("goalkeeper") || p.includes("keeper")) return "Goalkeeper";
-  if (p.includes("back") || p.includes("centre-back") || p.includes("defender"))
+  if (p.includes("back") || p.includes("defender") || p.includes("sweeper"))
     return "Defender";
   if (p.includes("midfield")) return "Midfielder";
   if (
     p.includes("forward") ||
     p.includes("winger") ||
     p.includes("striker") ||
-    p.includes("centre-forward")
+    p.includes("attack")
   )
     return "Forward";
   return pos;
 }
 
-function calculateAge(dateOfBirth) {
-  if (!dateOfBirth) return 0;
-  const dob = new Date(dateOfBirth);
-  const now = new Date();
-  let age = now.getFullYear() - dob.getFullYear();
-  const m = now.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
-  return age;
+function buildCareerPath(transfersPayload, currentClubName) {
+  const transfers = transfersPayload?.transfers;
+  if (!Array.isArray(transfers) || transfers.length === 0) return [];
+
+  // API returns transfers newest-first → reverse to chronological
+  const chrono = [...transfers].reverse();
+
+  const path = [];
+  const seen = new Set();
+  const push = (club, season) => {
+    if (!club?.name) return;
+    // dedupe consecutive duplicates (loan returns etc.)
+    if (path.length && path[path.length - 1].club === club.name) return;
+    if (seen.has(club.name)) return;
+    seen.add(club.name);
+    path.push({ club: club.name, season: season || "" });
+  };
+
+  for (const t of chrono) {
+    push(t.clubFrom, t.season);
+    push(t.clubTo, t.season);
+  }
+
+  // Make sure last stop is the current club
+  if (currentClubName && path.length) {
+    const last = path[path.length - 1].club;
+    if (last !== currentClubName) {
+      // Some transfers list "Without Club" or short loans; force current club at the end
+      if (!seen.has(currentClubName)) {
+        path.push({ club: currentClubName, season: "" });
+      }
+    }
+  }
+
+  return path;
 }
 
 async function main() {
@@ -128,76 +110,83 @@ async function main() {
   console.log("===========================\n");
 
   const allPlayers = [];
-  const targetPerLeague = 25; // ~125 total, curate down to 100
 
   for (const league of LEAGUES) {
-    console.log(`\nProcessing ${league.name}...`);
-    const clubs = await getLeaguePlayers(league.id);
+    console.log(`\n=== ${league.name} ===`);
+    const clubsResp = await fetchJSON(
+      `/competitions/${league.id}/clubs?season_id=${SEASON}`
+    );
+    const clubs = clubsResp?.clubs || [];
     if (!clubs.length) {
-      console.log(`  No clubs found for ${league.name}, skipping`);
+      console.log(`  No clubs found, skipping`);
       continue;
     }
+    console.log(`  ${clubs.length} clubs`);
 
-    let leaguePlayers = 0;
-
+    // Collect all players in the league with metadata
+    const candidates = [];
     for (const club of clubs) {
-      if (leaguePlayers >= targetPerLeague) break;
-
-      console.log(`  Club: ${club.name}`);
-      await sleep(500);
-
-      const players = await getClubPlayers(club.id);
-      if (!players.length) continue;
-
-      // Take top 2-3 players per club (by market value or just first listed)
-      const topPlayers = players.slice(0, 3);
-
-      for (const p of topPlayers) {
-        if (leaguePlayers >= targetPerLeague) break;
-
-        await sleep(500);
-        const profile = await getPlayerProfile(p.id);
-        if (!profile) continue;
-
-        await sleep(500);
-        const transfers = await getPlayerTransfers(p.id);
-        const careerPath = buildCareerPath(transfers);
-
-        // Skip players with very short career paths (not interesting for the game)
-        if (careerPath.length < 2) {
-          console.log(`  Skipping ${profile.name} (career too short)`);
-          continue;
-        }
-
-        const player = {
-          id: String(p.id),
-          name: profile.name || p.name,
-          nationality: profile.nationality || "Unknown",
-          position: mapPosition(profile.position || p.position),
-          age: calculateAge(profile.dateOfBirth),
+      await sleep(REQUEST_DELAY_MS);
+      const players = (await fetchJSON(`/clubs/${club.id}/players?season_id=${SEASON}`))?.players || [];
+      for (const p of players) {
+        candidates.push({
+          ...p,
           currentClub: club.name,
           currentLeague: league.name,
-          careerPath,
-          imageUrl: profile.imageUrl || p.image || "",
-        };
-
-        allPlayers.push(player);
-        leaguePlayers++;
-        console.log(
-          `  Added: ${player.name} (${player.position}, ${player.nationality}) — ${careerPath.length} clubs`
-        );
+        });
       }
+    }
+    console.log(`  ${candidates.length} candidate players`);
+
+    // Sort by market value (desc), take the top N
+    candidates.sort((a, b) => (b.marketValue || 0) - (a.marketValue || 0));
+    const top = candidates.slice(0, TOP_PER_LEAGUE * 2); // grab extra in case some get skipped
+
+    let added = 0;
+    for (const p of top) {
+      if (added >= TOP_PER_LEAGUE) break;
+      await sleep(REQUEST_DELAY_MS);
+      const transfers = await fetchJSON(`/players/${p.id}/transfers`);
+      const careerPath = buildCareerPath(transfers, p.currentClub);
+
+      if (careerPath.length < MIN_CAREER_STOPS) {
+        continue;
+      }
+
+      const player = {
+        id: String(p.id),
+        name: p.name,
+        nationality: Array.isArray(p.nationality) ? p.nationality[0] : (p.nationality || "Unknown"),
+        position: mapPosition(p.position),
+        age: p.age || 0,
+        currentClub: p.currentClub,
+        currentLeague: p.currentLeague,
+        careerPath,
+        imageUrl: p.image || "",
+      };
+      allPlayers.push(player);
+      added++;
+      console.log(
+        `  + ${player.name} (${player.position}, ${player.nationality}) — ${careerPath.length} clubs`
+      );
     }
   }
 
-  console.log(`\nTotal players fetched: ${allPlayers.length}`);
+  // De-duplicate by id (a player can appear in multiple league rosters mid-transfer)
+  const byId = new Map();
+  for (const p of allPlayers) byId.set(p.id, p);
+  const deduped = Array.from(byId.values());
 
-  // Write output
+  console.log(`\n✅ Total players: ${deduped.length}`);
+
   const outDir = join(__dirname, "..", "src", "data");
   mkdirSync(outDir, { recursive: true });
   const outPath = join(outDir, "players.json");
-  writeFileSync(outPath, JSON.stringify(allPlayers, null, 2));
-  console.log(`\nSaved to ${outPath}`);
+  writeFileSync(outPath, JSON.stringify(deduped, null, 2));
+  console.log(`💾 Saved to ${outPath}`);
 }
 
-main().catch(console.error);
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
