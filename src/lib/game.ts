@@ -141,13 +141,13 @@ const CANONICAL_NAMES: Record<string, string> = {
 
 // Lookup the canonical / preferred display form. Returns the original name if no override exists.
 function canonicalName(name: string): string {
-  const key = normaliseClub(name);
+  const key = stripClubKey(name);
   return CANONICAL_NAMES[key] || name;
 }
 
-// Strip youth / reserve markers + common club-type designators (FC, AFC…)
-// Returns a lowercase normalised key used for matching duplicates.
-function normaliseClub(name: string): string {
+// Strip youth / reserve markers + common club-type designators (FC, AFC, …)
+// to produce a lowercase key suitable for alias / canonical lookups.
+function stripClubKey(name: string): string {
   return name
     .replace(/\s+U(15|16|17|18|19|20|21|23)$/i, "")
     .replace(/\s+(II|Yth\.?|Youth|Reserves?|Jgd\.?|Aca\.?)$/i, "")
@@ -159,6 +159,14 @@ function normaliseClub(name: string): string {
     .replace(/\s+0?\d{1,2}\s+/g, " ") // strip embedded numbers like "Bayer 04"
     .trim()
     .toLowerCase();
+}
+
+// Returns a lowercase key used for matching duplicates / same organisation.
+// Resolves aliases so "man city" and "manchester city" both yield the same key.
+function normaliseClub(name: string): string {
+  const stripped = stripClubKey(name);
+  const canonical = CANONICAL_NAMES[stripped];
+  return canonical ? canonical.toLowerCase() : stripped;
 }
 
 // Filter out non-club entries the API sometimes returns
@@ -187,21 +195,21 @@ function collapseSameOrganization(clubs: string[]): string[] {
   for (let i = 1; i < clubs.length; i++) {
     const last = out[out.length - 1];
     const next = clubs[i];
-    const sameOrg = sameOrganization(last, next);
+    if (!sameOrganization(last, next)) {
+      out.push(next);
+      continue;
+    }
     const lastYouth = isYouthStop(last);
     const nextYouth = isYouthStop(next);
-
-    if (sameOrg && lastYouth && nextYouth) {
-      // youth + youth at same org → collapse (keep the existing youth label)
-      continue;
-    }
-    if (sameOrg && !lastYouth && !nextYouth) {
-      // senior + senior at same org → collapse, prefer longer/full name
+    if (lastYouth && !nextYouth) {
+      // youth → senior at same org → collapse to senior name
+      out[out.length - 1] = next;
+    } else if (!lastYouth && !nextYouth) {
+      // senior → senior at same org → prefer longer/full name
       if (next.length > last.length) out[out.length - 1] = next;
-      continue;
     }
-    // youth + senior (or senior + youth) at same org → keep both as separate stops
-    out.push(next);
+    // youth → youth or senior → youth: keep `last` as-is (already the senior or
+    // earlier youth label)
   }
   return out;
 }
@@ -209,27 +217,34 @@ function collapseSameOrganization(clubs: string[]): string[] {
 export function getRevealedClues(player: Player, tier: ClueTier) {
   const clues: Record<string, string | number | string[]> = {};
 
-  // Tier 1: Career path — drop non-clubs, collapse same-org stops, hide current
+  // Tier 1: Career path
+  // 1. Drop non-club entries ("Without Club" etc.)
+  // 2. Collapse consecutive same-organisation stops
+  // 3. Replace senior-team names with their canonical form
+  // 4. Trim to the most recent 3 stops (window doesn't have to start at the
+  //    player's first club)
+  // 5. Hide the current/last club as ??? unless it's a one-club career
   const rawPath = player.careerPath.map((s) => s.club).filter(isRealClub);
   const collapsed = collapseSameOrganization(rawPath);
-  // Replace senior-team names with their canonical form (e.g. "Liverpool" → "Liverpool FC")
-  const fullPath = collapsed.map((c) => (isYouthStop(c) ? c : canonicalName(c)));
+  const canonical = collapsed.map((c) =>
+    isYouthStop(c) ? c : canonicalName(c)
+  );
+  const trimmed = canonical.slice(-3);
+
   if (tier >= 5) {
-    clues.careerPath = fullPath;
-  } else {
-    // Replace the current/last club with a placeholder.
-    // Compare via normaliseClub so e.g. "Newcastle United" (canonical) matches
-    // "Newcastle" (raw currentClub).
-    const trimmed = [...fullPath];
-    if (
-      trimmed.length > 0 &&
-      !isYouthStop(trimmed[trimmed.length - 1]) &&
-      normaliseClub(trimmed[trimmed.length - 1]) ===
-        normaliseClub(player.currentClub)
-    ) {
-      trimmed[trimmed.length - 1] = "???";
-    }
     clues.careerPath = trimmed;
+  } else {
+    const result = [...trimmed];
+    const lastIsCurrent =
+      result.length > 0 &&
+      !isYouthStop(result[result.length - 1]) &&
+      normaliseClub(result[result.length - 1]) ===
+        normaliseClub(player.currentClub);
+    // Don't hide if the entire visible career is a single club (one-club man)
+    if (result.length > 1 && lastIsCurrent) {
+      result[result.length - 1] = "???";
+    }
+    clues.careerPath = result;
   }
 
   // Tier 2+: Position
