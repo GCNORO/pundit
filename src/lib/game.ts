@@ -99,11 +99,11 @@ export function generateShareText(state: GameState, date: string): string {
     )
     .join("");
 
-  return `Footle ${date} ${guessCount}/${MAX_GUESSES}\n${squares}\nhttps://footle.game`;
+  return `Pundit ${date} ${guessCount}/${MAX_GUESSES}\n${squares}`;
 }
 
 // Load/save game state from localStorage
-const STORAGE_KEY = "footle-state";
+const STORAGE_KEY = "pundit-state";
 
 export function loadGameState(date: string): GameState | null {
   if (typeof window === "undefined") return null;

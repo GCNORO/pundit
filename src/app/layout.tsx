@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Footle — Daily Soccer Guessing Game",
+  title: "Pundit — Daily Football Guessing Game",
   description:
-    "Guess the soccer player from their career path. A new puzzle every day.",
+    "Guess the football player from their career path. A new puzzle every day.",
   openGraph: {
-    title: "Footle — Daily Soccer Guessing Game",
-    description: "Guess the soccer player from their career path.",
+    title: "Pundit — Daily Football Guessing Game",
+    description: "Guess the football player from their career path.",
     type: "website",
   },
 };

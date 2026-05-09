@@ -1,8 +1,8 @@
 {
-  "name": "footle",
+  "name": "pundit",
   "version": "0.1.0",
   "private": true,
-  "description": "Daily soccer player guessing game",
+  "description": "Daily football player guessing game",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
