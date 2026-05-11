@@ -28,7 +28,17 @@ export default function Home() {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [showCopied, setShowCopied] = useState(false);
   const [showHowTo, setShowHowTo] = useState(false);
+  const [confirmGiveUp, setConfirmGiveUp] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleGiveUp = () => {
+    if (!confirmGiveUp) {
+      setConfirmGiveUp(true);
+      return;
+    }
+    setGameState({ ...gameState, failed: true });
+    setConfirmGiveUp(false);
+  };
 
   // Auto-open the "How to play" modal for first-time visitors
   useEffect(() => {
@@ -398,6 +408,16 @@ export default function Home() {
                 </div>
               )}
             </div>
+            <button
+              type="button"
+              className={`give-up-btn${confirmGiveUp ? " confirming" : ""}`}
+              onClick={handleGiveUp}
+              onBlur={() => setTimeout(() => setConfirmGiveUp(false), 200)}
+            >
+              {confirmGiveUp
+                ? "Tap again to reveal the answer"
+                : "I give up — show the player"}
+            </button>
           </div>
         </>
       )}
