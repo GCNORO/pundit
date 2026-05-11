@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import players from "@/data/players.json";
 import {
   getDailyPuzzleIndex,
@@ -16,13 +16,10 @@ import {
 import type { Player, GameState } from "@/lib/types";
 
 export default function Home() {
-  const todayDate = getTodayDateString();
-  const puzzleIndex = getDailyPuzzleIndex(todayDate, players.length);
-  const todayPlayer = players[puzzleIndex] as Player;
-
-  const [gameState, setGameState] = useState<GameState>(() => {
-    return loadGameState(todayDate) || createGameState(todayDate);
-  });
+  // Defer date determination until client mount so the puzzle picks up the
+  // visitor's real "today" — not the build-time / server-time date.
+  const [todayDate, setTodayDate] = useState<string | null>(null);
+  const [gameState, setGameState] = useState<GameState | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -31,14 +28,12 @@ export default function Home() {
   const [confirmGiveUp, setConfirmGiveUp] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleGiveUp = () => {
-    if (!confirmGiveUp) {
-      setConfirmGiveUp(true);
-      return;
-    }
-    setGameState({ ...gameState, failed: true });
-    setConfirmGiveUp(false);
-  };
+  // Initialise date + game state once we're on the client
+  useEffect(() => {
+    const date = getTodayDateString();
+    setTodayDate(date);
+    setGameState(loadGameState(date) || createGameState(date));
+  }, []);
 
   // Auto-open the "How to play" modal for first-time visitors
   useEffect(() => {
@@ -49,17 +44,43 @@ export default function Home() {
     }
   }, []);
 
+  // Save state on change
+  useEffect(() => {
+    if (gameState) saveGameState(gameState);
+  }, [gameState]);
+
+  // Show a minimal placeholder until we know what day it is
+  if (!todayDate || !gameState) {
+    return (
+      <div className="app">
+        <header className="header">
+          <h1>
+            <span>Pun</span>dit
+          </h1>
+          <p>Loading today&rsquo;s puzzle…</p>
+        </header>
+      </div>
+    );
+  }
+
+  const puzzleIndex = getDailyPuzzleIndex(todayDate, players.length);
+  const todayPlayer = players[puzzleIndex] as Player;
+
+  const handleGiveUp = () => {
+    if (!confirmGiveUp) {
+      setConfirmGiveUp(true);
+      return;
+    }
+    setGameState({ ...gameState, failed: true });
+    setConfirmGiveUp(false);
+  };
+
   const wrongGuesses = gameState.guesses.filter(
     (g) => g.toLowerCase() !== todayPlayer.name.toLowerCase()
   ).length;
   const clueTier = getCurrentClueTier(wrongGuesses);
   const clues = getRevealedClues(todayPlayer, clueTier);
   const isGameOver = gameState.solved || gameState.failed;
-
-  // Save state on change
-  useEffect(() => {
-    saveGameState(gameState);
-  }, [gameState]);
 
   // Autocomplete filtering
   const filteredPlayers = inputValue.length >= 2
@@ -71,26 +92,23 @@ export default function Home() {
         .slice(0, 8)
     : [];
 
-  const handleSubmit = useCallback(
-    (name: string) => {
-      if (isGameOver) return;
-      const trimmed = name.trim();
-      if (!trimmed) return;
+  const handleSubmit = (name: string) => {
+    if (isGameOver) return;
+    const trimmed = name.trim();
+    if (!trimmed) return;
 
-      // Must be a valid player from our database
-      const validPlayer = players.find(
-        (p) => p.name.toLowerCase() === trimmed.toLowerCase()
-      );
-      if (!validPlayer) return;
+    // Must be a valid player from our database
+    const validPlayer = players.find(
+      (p) => p.name.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (!validPlayer) return;
 
-      const newState = makeGuess(gameState, validPlayer.name, todayPlayer);
-      setGameState(newState);
-      setInputValue("");
-      setShowAutocomplete(false);
-      setActiveIndex(-1);
-    },
-    [gameState, todayPlayer, isGameOver]
-  );
+    const newState = makeGuess(gameState, validPlayer.name, todayPlayer);
+    setGameState(newState);
+    setInputValue("");
+    setShowAutocomplete(false);
+    setActiveIndex(-1);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
