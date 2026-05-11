@@ -129,7 +129,11 @@ const CANONICAL_NAMES: Record<string, string> = {
   "atalanta bc": "Atalanta",
   "fiorentina": "Fiorentina",
   "torino": "Torino FC",
-  "bologna": "Bologna FC",
+  "bologna": "Bologna",
+  "bologna fc": "Bologna",
+  "bologna fc 1909": "Bologna",
+  "nott'm forest": "Nottingham Forest",
+  "nottm forest": "Nottingham Forest",
   "genoa": "Genoa CFC",
   "udinese": "Udinese",
   "sampdoria": "Sampdoria",
@@ -160,8 +164,9 @@ function stripClubKey(name: string): string {
     .replace(/\s+U(15|16|17|18|19|20|21|23)$/i, "")
     .replace(/\s+(II|Yth\.?|Youth|Reserves?|Jgd\.?|Aca\.?)$/i, "")
     .replace(/\s+B$/, "")
-    // trailing club designators: "Arsenal FC" → "Arsenal", "Atalanta BC" → "Atalanta"
-    .replace(/\s+(FC|AFC|CF|SC|AC|BC|FK|SK|CD|UD|RC|Calcio|1909)$/i, "")
+    // trailing club designators (handles chains like "Bologna FC 1909"):
+    // strip every trailing designator/year in one pass
+    .replace(/(\s+(FC|AFC|CF|SC|AC|BC|FK|SK|CD|UD|RC|Calcio|19\d{2}|20\d{2}))+$/i, "")
     // leading club designators: "FC Barcelona" → "Barcelona"
     .replace(/^(FC|AC|AS|SC|SK|SS|RC|UD|CD|RB|TSG|TSV|VfL|VfB|FK|SV|US|RCD|CA|RSC)\s+/i, "")
     .replace(/\s+0?\d{1,2}\s+/g, " ") // strip embedded numbers like "Bayer 04"
