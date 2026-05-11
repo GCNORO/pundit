@@ -28,7 +28,7 @@ const LEAGUES = [
   { id: "FR1", name: "Ligue 1" },
 ];
 
-const SEASON = "2024";
+const SEASON = "2025";
 const TOP_PER_LEAGUE = 60;       // ~300 total; tweak as needed
 const MIN_CAREER_STOPS = 3;      // need a meaningful path
 const REQUEST_DELAY_MS = 150;    // be polite
@@ -105,11 +105,39 @@ function buildCareerPath(transfersPayload, currentClubName) {
   return path;
 }
 
+// Normalise a club name for the league-lookup map (strips youth/designators
+// like the runtime does in src/lib/game.ts)
+function normKey(name) {
+  return name
+    .replace(/\s+U(15|16|17|18|19|20|21|23)$/i, "")
+    .replace(/\s+(II|Yth\.?|Youth|Reserves?|Jgd\.?|Aca\.?)$/i, "")
+    .replace(/\s+B$/, "")
+    .replace(/(\s+(FC|AFC|CF|SC|AC|BC|FK|SK|CD|UD|RC|Calcio|19\d{2}|20\d{2}))+$/i, "")
+    .replace(/^(FC|AC|AS|SC|SK|SS|RC|UD|CD|RB|TSG|TSV|VfL|VfB|FK|SV|US|RCD|CA|RSC)\s+/i, "")
+    .trim()
+    .toLowerCase();
+}
+
 async function main() {
   console.log("Footle Player Data Pipeline");
   console.log("===========================\n");
 
   const allPlayers = [];
+
+  // Pre-pass: build a club name → league map across all big-5 leagues so we
+  // can look up the league for a player's latest transfer destination
+  console.log("Building club → league map…");
+  const clubToLeague = new Map();
+  for (const league of LEAGUES) {
+    const clubsResp = await fetchJSON(
+      `/competitions/${league.id}/clubs?season_id=${SEASON}`
+    );
+    for (const club of clubsResp?.clubs || []) {
+      clubToLeague.set(normKey(club.name), league.name);
+    }
+    await sleep(REQUEST_DELAY_MS);
+  }
+  console.log(`  ${clubToLeague.size} clubs mapped across ${LEAGUES.length} leagues\n`);
 
   for (const league of LEAGUES) {
     console.log(`\n=== ${league.name} ===`);
@@ -153,14 +181,23 @@ async function main() {
         continue;
       }
 
+      // Prefer the destination of the most recent transfer as currentClub —
+      // the season roster lags real life by months. Look up the league from
+      // our pre-built map so currentLeague stays in sync.
+      const latestTransfer = transfers?.transfers?.[0];
+      const latestDestination = latestTransfer?.clubTo?.name;
+      const currentClub = latestDestination || p.currentClub;
+      const mappedLeague = clubToLeague.get(normKey(currentClub));
+      const currentLeague = mappedLeague || p.currentLeague;
+
       const player = {
         id: String(p.id),
         name: p.name,
         nationality: Array.isArray(p.nationality) ? p.nationality[0] : (p.nationality || "Unknown"),
         position: mapPosition(p.position),
         age: p.age || 0,
-        currentClub: p.currentClub,
-        currentLeague: p.currentLeague,
+        currentClub,
+        currentLeague,
         careerPath,
         imageUrl: p.image || "",
       };
