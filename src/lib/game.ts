@@ -1,6 +1,6 @@
 import { Player, GameState, ClueTier } from "./types";
 
-const MAX_GUESSES = 5;
+const MAX_GUESSES = 6;
 
 // Deterministic daily puzzle based on date
 export function getDailyPuzzleIndex(date: string, totalPlayers: number): number {
@@ -261,13 +261,12 @@ export function getRevealedClues(player: Player, tier: ClueTier) {
   // Tier 3+: Nationality
   if (tier >= 3) clues.nationality = player.nationality;
 
-  // Tier 4+: Age
-  if (tier >= 4) clues.age = player.age;
+  // Tier 4+: Current league (e.g. "Premier League") — strong narrowing clue
+  if (tier >= 4) clues.currentLeague = player.currentLeague;
 
-  // Tier 5: Current club & league (use canonical display name)
+  // Tier 5: Current club (resolves the ??? in the career path)
   if (tier >= 5) {
     clues.currentClub = canonicalName(player.currentClub);
-    clues.currentLeague = player.currentLeague;
   }
 
   return clues;

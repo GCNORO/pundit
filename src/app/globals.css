@@ -136,6 +136,22 @@ body {
   font-weight: 500;
 }
 
+/* The "???" placeholder for the unknown current club */
+.career-stop.mystery {
+  background: transparent;
+  border: 1px dashed var(--accent);
+  color: var(--accent);
+  font-style: italic;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.clue-value.mystery {
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  font-style: italic;
+}
+
 .career-arrow {
   color: var(--text-dim);
   font-size: 0.75rem;
@@ -260,6 +276,45 @@ body {
 
 .result.failed h2 {
   color: var(--red);
+}
+
+/* Player bio shown after game over (trading-card reward) */
+.bio-card {
+  margin: 6px 0 18px;
+  padding: 14px 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.bio-row {
+  display: flex;
+  gap: 10px;
+  font-size: 0.9rem;
+  align-items: baseline;
+}
+
+.bio-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  min-width: 70px;
+}
+
+.bio-value {
+  font-weight: 500;
+  flex: 1;
+}
+
+.bio-career .bio-value {
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .share-btn {

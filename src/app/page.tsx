@@ -173,7 +173,11 @@ export default function Home() {
             {(clues.careerPath as string[]).map((club, i) => (
               <span key={i}>
                 {i > 0 && <span className="career-arrow"> → </span>}
-                <span className="career-stop">{club}</span>
+                <span
+                  className={`career-stop${club === "???" ? " mystery" : ""}`}
+                >
+                  {club}
+                </span>
               </span>
             ))}
           </div>
@@ -182,7 +186,7 @@ export default function Home() {
         {/* Tier 2: Position */}
         <div className={`clue-card ${clueTier < 2 ? "locked" : ""}`}>
           <span className="clue-label">Position</span>
-          <span className="clue-value">
+          <span className={`clue-value${clueTier < 2 ? " mystery" : ""}`}>
             {clueTier >= 2 ? (clues.position as string) : "???"}
           </span>
         </div>
@@ -190,26 +194,24 @@ export default function Home() {
         {/* Tier 3: Nationality */}
         <div className={`clue-card ${clueTier < 3 ? "locked" : ""}`}>
           <span className="clue-label">Nation</span>
-          <span className="clue-value">
+          <span className={`clue-value${clueTier < 3 ? " mystery" : ""}`}>
             {clueTier >= 3 ? (clues.nationality as string) : "???"}
           </span>
         </div>
 
-        {/* Tier 4: Age */}
+        {/* Tier 4: Current League */}
         <div className={`clue-card ${clueTier < 4 ? "locked" : ""}`}>
-          <span className="clue-label">Age</span>
-          <span className="clue-value">
-            {clueTier >= 4 ? (clues.age as number) : "???"}
+          <span className="clue-label">League</span>
+          <span className={`clue-value${clueTier < 4 ? " mystery" : ""}`}>
+            {clueTier >= 4 ? (clues.currentLeague as string) : "???"}
           </span>
         </div>
 
-        {/* Tier 5: Current Club & League */}
+        {/* Tier 5: Current Club */}
         <div className={`clue-card ${clueTier < 5 ? "locked" : ""}`}>
           <span className="clue-label">Club</span>
-          <span className="clue-value">
-            {clueTier >= 5
-              ? `${clues.currentClub} (${clues.currentLeague})`
-              : "???"}
+          <span className={`clue-value${clueTier < 5 ? " mystery" : ""}`}>
+            {clueTier >= 5 ? (clues.currentClub as string) : "???"}
           </span>
         </div>
       </div>
@@ -235,6 +237,37 @@ export default function Home() {
         <div className={`result ${gameState.failed ? "failed" : ""}`}>
           <h2>{gameState.solved ? "You got it!" : "Not this time"}</h2>
           <p className="player-name">{todayPlayer.name}</p>
+
+          {/* Full player bio (revealed once the game is over) */}
+          <div className="bio-card">
+            <div className="bio-row">
+              <span className="bio-label">Position</span>
+              <span className="bio-value">{todayPlayer.position}</span>
+            </div>
+            <div className="bio-row">
+              <span className="bio-label">Nation</span>
+              <span className="bio-value">{todayPlayer.nationality}</span>
+            </div>
+            <div className="bio-row">
+              <span className="bio-label">Age</span>
+              <span className="bio-value">{todayPlayer.age}</span>
+            </div>
+            <div className="bio-row">
+              <span className="bio-label">Club</span>
+              <span className="bio-value">
+                {(getRevealedClues(todayPlayer, 5).currentClub as string)} ·{" "}
+                {todayPlayer.currentLeague}
+              </span>
+            </div>
+            <div className="bio-row bio-career">
+              <span className="bio-label">Career</span>
+              <span className="bio-value">
+                {(getRevealedClues(todayPlayer, 5).careerPath as string[]).join(
+                  " → "
+                )}
+              </span>
+            </div>
+          </div>
 
           <div className="share-menu">
             <p className="share-label">Share your result</p>
@@ -391,10 +424,10 @@ export default function Home() {
             </p>
             <ul className="modal-list">
               <li>
-                <strong>5 guesses</strong> per day. The puzzle resets at midnight.
+                <strong>6 guesses</strong> per day. The puzzle resets at midnight.
               </li>
               <li>
-                You start with <strong>2&ndash;3 clubs</strong> from the player&rsquo;s
+                You start with up to <strong>3 clubs</strong> from the player&rsquo;s
                 career, in order. The current club is hidden as <code>???</code>.
               </li>
               <li>
@@ -403,8 +436,8 @@ export default function Home() {
                   <li>① Career path</li>
                   <li>② Position</li>
                   <li>③ Nationality</li>
-                  <li>④ Age</li>
-                  <li>⑤ Current club &amp; league</li>
+                  <li>④ Current league</li>
+                  <li>⑤ Current club (resolves the ???)</li>
                 </ul>
               </li>
               <li>
