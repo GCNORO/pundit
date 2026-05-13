@@ -138,7 +138,6 @@ const CANONICAL_NAMES: Record<string, string> = {
   "bologna fc": "Bologna",
   "bologna fc 1909": "Bologna",
   "nott'm forest": "Nottingham Forest",
-  "nottm forest": "Nottingham Forest",
   "genoa": "Genoa CFC",
   "udinese": "Udinese",
   "sampdoria": "Sampdoria",
