@@ -221,7 +221,7 @@ export default function Home() {
 
         {/* Tier 3: Nationality */}
         <div className={`clue-card ${clueTier < 3 ? "locked" : ""}`}>
-          <span className="clue-label">Nation</span>
+          <span className="clue-label">Nationality</span>
           <span className={`clue-value${clueTier < 3 ? " mystery" : ""}`}>
             {clueTier >= 3 ? (clues.nationality as string) : "???"}
           </span>
@@ -273,7 +273,7 @@ export default function Home() {
               <span className="bio-value">{todayPlayer.position}</span>
             </div>
             <div className="bio-row">
-              <span className="bio-label">Nation</span>
+              <span className="bio-label">Nationality</span>
               <span className="bio-value">{todayPlayer.nationality}</span>
             </div>
             <div className="bio-row">

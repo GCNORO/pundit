@@ -112,7 +112,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-dim);
-  min-width: 80px;
+  min-width: 100px;
 }
 
 .clue-value {
@@ -304,7 +304,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-dim);
-  min-width: 70px;
+  min-width: 90px;
 }
 
 .bio-value {
